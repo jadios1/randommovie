@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body
+    {
+        background-color: blanchedalmond;
+    }
+    .buttoncontainter
+    {
+        position: relative;
+        margin: 10px;
+        display: flex;   
+        justify-content: center;
+        align-items: center;
+    }
+    .horror
+    {
+        margin: 10px;
+        height: 50px;
+        background-color: red;
+        outline-style: dashed;
+        outline-width: 0px;
+        border-radius: 5px;
+        width: 150px;
+        font-size: 30px;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        opacity: 1;
+        transition: opacity 500ms;
+
+    }
+    .comedy
+    {
+        margin: 10px;
+        height: 50px;
+        background-color: lightgreen;
+        outline-style: dashed;
+        outline-width: 0px;
+        border-radius: 5px;
+        width: 150px;
+        font-size: 30px;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        opacity: 1;
+        transition: opacity 500ms;
+
+    }
+    .generate
+    {   position: relative;
+        top: -10px;
+        display: flex;
+        justify-content: center;
+
+
+    }
+    .generatebutton
+    {
+        margin: 10px;
+        height: 50px;
+        background-color: lightblue;
+        outline-style: dashed;
+        outline-width: 0px;
+        border-radius: 5px;
+        width: 150px;
+        font-size: 30px;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        opacity: 1;
+        transition: opacity 500ms;
+        
+    }
+    .film
+    {
+        height: 50vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .film1
+    {
+        display: flex;
+        margin: 20px;
+    }
+    .image
+    {
+        margin: 20px;
+        box-shadow: 0px 0px 20px;
+    }
+    .slider1
+    {
+        position: relative;
+
+    }
+    .napisimdb
+    {
+        position: relative;
+        bottom: 5px;
+        right: -10px;
+    }
+    .slider
+    {
+        position: absolute;
+        bottom: 20px;
+    }
+
+
+
+    
+</style>
+
+<body>
+    <div class = 'buttoncontainter'>
+        <button class="horror" onclick="przyciskhorror()" id="horror" data-status="active">Horror</button>
+        <button class="comedy" onclick="przyciskcomedy()" id="comedy" data-status="active">Comedy</button>
+    </div>
+    <div class="generate">
+        <button class="generatebutton" onclick="randommovie()">
+            Generate
+        </button>
+        <div class= "slider1">
+            <p class="napisimdb">IMDB RATING:</p>
+            <input type="range" min="1" max="10" value="5" class="slider" id="myRange">    
+        </div>
+    </div>
+    <div class="film">
+        <img id="poster" src="questionmark.png" alt="Movie Poster" width="300px" class="image" >
+        <p>
+            <h1 id="nazwa">...</h1>
+            <strong></strong>
+        </p>
+    </div>
+</body>
+</html>
+
+<script>
+    let genrefilmu = 0
+    function przyciskhorror()
+    {
+        const horror = document.getElementById("horror")
+        if (horror.getAttribute('data-status') === 'active')
+        {
+            horror.setAttribute('data-status','notactive')
+            comedy.setAttribute('data-status','active')
+        }
+        else
+        {
+            horror.setAttribute('data-status','active')
+        }
+        comedycheck()
+        horrorcheck()
+
+    }
+    function przyciskcomedy()
+    {
+        const comedy = document.getElementById("comedy")
+        if (comedy.getAttribute('data-status') === 'active')
+        {
+            comedy.setAttribute('data-status','notactive')
+            horror.setAttribute('data-status','active')
+
+        }
+        else
+        {
+            comedy.setAttribute('data-status','active')
+        }
+        comedycheck()
+        horrorcheck()
+    }
+    function comedycheck()
+    {
+        if (comedy.getAttribute('data-status') === 'active')
+        {
+            comedy.style.opacity = 1
+        }
+    else
+    {
+        comedy.style.opacity = 0.5
+    }
+    }
+    function horrorcheck()
+    {
+        if (horror.getAttribute('data-status') === 'active')
+        {
+            horror.style.opacity = 1
+        }
+    else
+    {
+        horror.style.opacity = 0.5
+    }
+    }
+    const apiKey = '455281138ff98626577c151b694b7d0b';
+    const baseUrl = 'https://api.themoviedb.org/3/movie/popular?api_key=';
+    const h1 = document.getElementById("nazwa")
+    const posterImg = document.getElementById("poster");
+    const slider = document.getElementById("myRange")
+
+
+    async function randommovie() {
+    let rating = slider.value;
+
+    if (horror.getAttribute('data-status') === 'active') {
+        genrefilmu = 35;
+    }
+    if (comedy.getAttribute('data-status') === 'active') {
+        genrefilmu = 27;
+    }
+    if (comedy.getAttribute('data-status') === 'active' && horror.getAttribute('data-status') === 'active') {
+        return;
+    }
+
+    let isGenre = false;
+    while (!isGenre) {
+        let randomstrona = Math.floor(Math.random() * 500) + 1; // Generates random integer between 1 and 500
+        randomstrona = parseInt(randomstrona);
+        const url = baseUrl + apiKey + "&page=" + randomstrona;
+        const response = await fetch(url);
+        const data = await response.json();
+        const movies = data.results;
+        console.log(movies[0])
+
+        for (let i = 0; i < movies.length; i++) {
+            console.log(movies[i].vote_average);
+            if (movies[i].genre_ids.includes(genrefilmu) && movies[i].poster_path && movies[i].vote_average > rating && movies[i].vote_count > 100) {
+                h1.innerHTML = movies[i].title + " " + movies[i].release_date.substring(0, 4);
+                const posterUrl = "https://image.tmdb.org/t/p/w500" + movies[i].poster_path;
+                posterImg.src = posterUrl;
+                console.log(movies[i])
+                isGenre = true;
+                break;
+            }
+        }
+
+        // If no suitable movie is found on this page, fetch the next page
+        if (!isGenre) {
+            randommovie(); // Recursively call randommovie() to fetch next page
+            break; // Exit the loop to prevent further execution in this iteration
+        }
+
+       
+
+    }
+}
+
+
+</script>
